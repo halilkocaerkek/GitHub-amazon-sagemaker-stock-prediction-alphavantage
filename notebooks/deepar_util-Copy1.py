@@ -190,11 +190,7 @@ class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
         
         Return value: list of `pandas.DataFrame` objects, each containing the predictions
         """
-        #prediction_time = ts.index[-1] + 1
-        #print('test 3')
-        #print(ts.index[-1])
-        #print(datetime.timedelta(days=1))
-        prediction_time = ts.index[-1] + datetime.timedelta(days=1)
+        prediction_time = ts.index[-1] + 1
         quantiles = [str(q) for q in quantiles]
         req = self.__encode_request(ts, cat, dynamic_feat, num_samples, return_samples, quantiles)
         res = super(DeepARPredictor, self).predict(req)
@@ -221,8 +217,7 @@ class DeepARPredictor(sagemaker.predictor.RealTimePredictor):
         # however, if possible one will pass multiple time series as predictions will then be faster
         predictions = json.loads(response.decode('utf-8'))['predictions'][0]
         prediction_length = len(next(iter(predictions['quantiles'].values())))
-        #prediction_index = pd.DatetimeIndex(start=prediction_time, freq=freq, periods=prediction_length)        
-        prediction_index = pd.date_range(start=prediction_time, freq=freq, periods=prediction_length)  
+        prediction_index = pd.DatetimeIndex(start=prediction_time, freq=freq, periods=prediction_length)        
         if return_samples:
             dict_of_samples = {'sample_' + str(i): s for i, s in enumerate(predictions['samples'])}
         else:
@@ -339,15 +334,7 @@ def plot(
                 
                 
     # plot the target
-    #target_section = stockts[forecast_date-plot_history:forecast_date+prediction_length]
-    #print('====')
-    #print(prediction_length)
-    #print(datetime.timedelta(days=prediction_length))
-    #print(forecast_date)
-    #print(forecast_date+ datetime.timedelta(days=prediction_length))
-    #print(plot_history)
-    
-    target_section = stockts[forecast_date-datetime.timedelta(days=plot_history):forecast_date+ datetime.timedelta(days=prediction_length)]
+    target_section = stockts[forecast_date-plot_history:forecast_date+prediction_length]
     target_section.plot(color="black", label='target')
     
     # plot the confidence interval and the median predicted
